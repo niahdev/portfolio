@@ -39,7 +39,7 @@ jobs:
           DEPLOY_USER: ${{ secrets.OVH_USER }}
           DEPLOY_PATH: ${{ secrets.OVH_PATH }}
         run: |
-          rsync --archive --compress --delete \
+          rsync --archive --compress --delete --delete-excluded \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='deploy/' \
