@@ -11,7 +11,7 @@
 <header class="nav-shell">
   <div class="wrap nav">
     <a class="logo" href="#top">PARK<i>.KUNRYUL</i></a>
-    <nav class="nav-links"><a href="#about">About</a><a href="#skills">Skills</a><a href="#projects">Projects</a><a href="#contact">Contact</a></nav>
+    <nav class="nav-links"><a href="#about">About</a><a href="#skills">Skills</a><a href="#troubleshooting">Troubleshooting</a><a href="#projects">Projects</a><a href="#contact">Contact</a></nav>
     <div class="nav-actions"><a class="btn" href="https://github.com/dejava-daisky" target="_blank" rel="noreferrer">GitHub ↗</a><a class="btn primary" href="#projects">View Work</a></div>
   </div>
 </header>
@@ -64,9 +64,47 @@
     </div>
   </section>
 
+  <section id="troubleshooting" class="troubleshooting-section">
+    <div class="wrap">
+      <div class="section-head"><div><div class="section-tag">02 · Troubleshooting</div><h2>문제를 끝까지 추적했습니다.</h2></div><p>현상만 고치는 대신 재현 조건을 만들고, 로그와 실험으로 원인을 좁혀 다시 발생하지 않는 구조로 개선했습니다.</p></div>
+      <div class="trouble-grid">
+        <a class="trouble-card trouble-featured" href="./troubleshooting-gif.html" aria-label="gif_lower 트러블슈팅 상세 보기">
+          <div class="trouble-top"><span class="incident-badge">INCIDENT 01</span><span class="trouble-project">gif_lower · FFmpeg</span></div>
+          <h3>동시 압축 요청으로<br>서버가 불안정해지는 문제</h3>
+          <p class="trouble-summary">요청마다 FFmpeg 프로세스가 즉시 실행되면서 CPU와 메모리 경합이 발생했습니다. 동시 작업 수를 제어하는 큐와 IP별 요청 제한을 적용해 무거운 작업이 서버 전체로 번지지 않도록 개선했습니다.</p>
+          <div class="trouble-flow">
+            <div><small>Problem</small><b>무제한 병렬 실행</b></div><i>→</i>
+            <div><small>Cause</small><b>프로세스 자원 경합</b></div><i>→</i>
+            <div class="flow-solution"><small>Solution</small><b>Queue + 요청 제한</b></div>
+          </div>
+          <div class="trouble-evidence">
+            <div><strong>01</strong><span><b>재현</b>동시 업로드 조건을 나누어 서버 상태 확인</span></div>
+            <div><strong>02</strong><span><b>원인</b>요청 수만큼 생성되는 FFmpeg 프로세스 확인</span></div>
+            <div><strong>03</strong><span><b>개선</b>동시 처리 수 제한과 임시 파일 자동 정리</span></div>
+          </div>
+          <div class="trouble-footer"><div class="meta"><span>Node.js</span><span>FFmpeg</span><span>Job Queue</span><span>Docker</span></div><b>해결 과정 자세히 보기 <i>↗</i></b></div>
+        </a>
+
+        <article class="trouble-card trouble-small">
+          <div class="trouble-top"><span class="incident-badge amber">INCIDENT 02</span><span class="trouble-project">ER-Dodge · External API</span></div>
+          <h3>외부 API 장애가 서비스 중단으로 이어지는 문제</h3>
+          <p>자동 갱신, 캐시, 번들 데이터 폴백을 적용해 외부 데이터가 일시적으로 불안정해도 분석 기능을 유지하도록 설계했습니다.</p>
+          <div class="before-after"><span><small>Before</small><b>API 오류 → 화면 중단</b></span><i>→</i><span><small>After</small><b>마지막 정상 데이터 제공</b></span></div>
+        </article>
+
+        <article class="trouble-card trouble-small">
+          <div class="trouble-top"><span class="incident-badge blue">INCIDENT 03</span><span class="trouble-project">Kiosk · Docker</span></div>
+          <h3>PC마다 달라지는 실행 환경과 시작 순서 문제</h3>
+          <p>App·DB·Nginx를 Compose로 묶고 헬스체크와 의존성을 명시해 신규 PC에서도 같은 순서와 환경으로 실행되도록 개선했습니다.</p>
+          <div class="before-after"><span><small>Before</small><b>수동 설치·설정 누락</b></span><i>→</i><span><small>After</small><b>동일 환경으로 한 번에 실행</b></span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section id="projects">
     <div class="wrap">
-      <div class="section-head"><div><div class="section-tag">02 · Selected Work</div><h2>대표 프로젝트</h2></div><p>완성된 화면뿐 아니라 문제 정의, 설계 판단, 구현 과정과 운영 경험을 함께 보여주는 프로젝트를 선별했습니다.</p></div>
+      <div class="section-head"><div><div class="section-tag">03 · Selected Work</div><h2>대표 프로젝트</h2></div><p>완성된 화면뿐 아니라 문제 정의, 설계 판단, 구현 과정과 운영 경험을 함께 보여주는 프로젝트를 선별했습니다.</p></div>
       <div class="projects">
         <article class="project" id="er-dodge"><div class="project-art"><div><div class="project-no">PROJECT 01 · DATA SERVICE</div><h3>ER-Dodge</h3><p>게임 데이터를 분석해 사용자가 다음 경기에서 취할 행동을 제안하는 웹서비스</p></div><div class="mock-window"><div class="mock-nav"><span></span><span></span><span></span></div><div class="mock-row"></div><div class="mock-row short"></div><div class="mock-grid"><i></i><i></i><i></i></div></div></div><div class="project-body"><p class="desc">외부 게임 데이터를 수집·정규화해 사용자 전적을 기준 통계와 비교하고 행동 중심의 분석 결과를 제공합니다. OVHcloud VPS에 Docker 기반 실행 환경을 구성하고 Nginx를 앞단에 두어 도메인으로 직접 운영하는 서비스입니다.</p><div class="meta"><span>Node.js</span><span>OVHcloud VPS</span><span>Docker</span><span>Nginx</span><span>External API</span><span>Live Service</span></div><h4>담당 및 설계</h4><div class="bullets"><div>외부 게임 API와 기준 데이터 수집·정규화</div><div>사용자 전적과 티어·캐릭터 통계를 비교하는 분석 로직 구현</div><div>OVHcloud VPS에 Docker 기반 Node.js 서비스 배포</div><div>Nginx 리버스 프록시와 도메인 연결을 포함한 운영 환경 구성</div></div><h4>문제와 해결</h4><div class="bullets"><div>서버리스 플랫폼 의존 구조를 직접 관리하는 VPS 환경으로 이전해 실행 환경과 배포 구성을 통제할 수 있도록 개선했습니다.</div><div>외부 기준 데이터가 일시적으로 불안정해도 서비스가 중단되지 않도록 자동 갱신, 캐시, 번들 데이터 폴백 구조를 적용했습니다.</div></div><div class="project-links"><a href="https://github.com/dejava-daisky/er-dodge" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://niah.site/" target="_blank" rel="noreferrer">서비스 바로가기 ↗</a></div></div></article>
 
