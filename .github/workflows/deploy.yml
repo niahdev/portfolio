@@ -1,0 +1,50 @@
+name: Deploy portfolio
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to pt.niah.site
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.OVH_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.OVH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Sync public files
+        env:
+          DEPLOY_HOST: ${{ secrets.OVH_HOST }}
+          DEPLOY_USER: ${{ secrets.OVH_USER }}
+          DEPLOY_PATH: ${{ secrets.OVH_PATH }}
+        run: |
+          rsync --archive --compress --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='deploy/' \
+            -e 'ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes' \
+            ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+
+      - name: Verify deployment
+        run: curl --fail --silent --show-error https://pt.niah.site/ > /dev/null
