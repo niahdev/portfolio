@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Student Progress Kiosk 프로젝트의 컨테이너 구성 기록">
+  <title>Student Progress Kiosk | 박건률</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="nav-shell"><div class="wrap nav"><a class="logo" href="./index.html">PARK<i>.KUNRYUL</i></a><nav class="nav-links"><a href="#overview">Overview</a><a href="#environment">Problem Solving</a></nav><div class="nav-actions"><a class="btn" href="./index.html#troubleshooting">← Portfolio</a><a class="btn primary" href="https://github.com/niahdev/kiosk" target="_blank" rel="noreferrer">GitHub ↗</a></div></div></header>
+
+<main>
+  <section class="detail-hero"><div class="wrap"><div class="section-tag">Project 03 · Deployment System</div><h1>어느 PC에서도<br><span class="gradient">같은 순서로 실행합니다.</span></h1><p class="lead">Student Progress Kiosk는 학생별 프로젝트 진행 상황을 조회·관리하는 현장형 시스템입니다. 공개 화면과 관리자 기능, 데이터베이스를 하나의 실행 구성으로 묶었습니다.</p><div class="detail-meta"><span>Node.js</span><span>MySQL</span><span>Docker Compose</span><span>Nginx</span></div></div></section>
+
+  <section class="detail-content"><div class="wrap detail-layout">
+    <div class="detail-main">
+      <article class="detail-section" id="overview"><small>01 · OVERVIEW</small><h2>공개 화면과 관리자 기능이 같은 데이터를 사용합니다.</h2><p>학생, 프로젝트, 진행 단계, 피드백 데이터를 구조화하고 공개 키오스크와 관리자 CRUD 화면이 같은 데이터베이스를 바라보도록 구성했습니다.</p><ul class="detail-list"><li>학생·프로젝트·진행 단계·피드백 데이터 구조</li><li>조회 화면과 관리자 CRUD 기능</li><li>애플리케이션·DB·프록시 통합 구성</li></ul></article>
+
+      <article class="detail-section" id="environment"><small>02 · PROBLEM SOLVING</small><h2>수동 설치와 암묵적인 시작 순서를 없앴습니다.</h2><p>PC마다 Node.js와 MySQL 설치 상태가 달랐고 DB보다 애플리케이션이 먼저 시작되면 연결 오류가 발생했습니다. App·DB·Nginx를 Compose로 묶고 헬스체크와 서비스 의존성을 명시했습니다.</p><div class="architecture-flow"><div><b>Database</b><span>헬스체크 통과</span></div><div><b>Application</b><span>DB 준비 후 시작</span></div><div><b>Nginx</b><span>외부 요청 전달</span></div></div><ul class="detail-list"><li>환경변수와 볼륨을 구성 파일로 명시</li><li>DB 준비 상태를 헬스체크로 확인</li><li>신규 PC에서도 동일 명령으로 전체 서비스 실행</li></ul></article>
+
+      <article class="detail-section"><small>03 · RESULT</small><h2>설치 설명이 아니라 실행 가능한 구성으로 전달합니다.</h2><p>필요한 런타임과 서비스 순서를 코드로 남겨 환경 차이로 생기는 오류를 줄였습니다. 새로운 PC에서도 같은 명령과 같은 구성으로 재현할 수 있습니다.</p></article>
+    </div>
+    <aside class="detail-aside"><b>Student Progress Kiosk</b><a href="#overview">프로젝트 개요</a><a href="#environment">실행 환경 문제 해결</a><a href="https://github.com/niahdev/kiosk" target="_blank" rel="noreferrer">GitHub ↗</a></aside>
+  </div></section>
+  <div class="wrap detail-actions"><a class="btn" href="./index.html#troubleshooting">← 문제 해결 목록</a><a class="btn primary" href="https://github.com/niahdev/kiosk" target="_blank" rel="noreferrer">구성 파일 확인 ↗</a></div>
+</main>
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Kiosk · MySQL · Docker Compose · Nginx</span></div></footer>
+</body>
+</html>
