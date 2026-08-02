@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Docker Compose 헬스체크와 서비스 시작 순서 개선 기록">
+  <title>Compose 시작 순서 해결 기록 | 박건률</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<header class="nav-shell"><div class="wrap nav"><a class="logo" href="../">PARK<i>.KUNRYUL</i></a><nav class="nav-links"><a href="../systems/">Systems</a><a href="./">Incidents</a><a href="../lab/">Lab</a></nav><div class="nav-actions"><a class="btn" href="./">← Incidents</a><a class="btn primary" href="https://github.com/niahdev/kiosk" target="_blank" rel="noreferrer">GitHub ↗</a></div></div></header>
+<main>
+  <section class="article-hero"><div class="wrap"><div class="breadcrumb"><a href="../">Portfolio</a> / <a href="./">Incidents</a> / Compose Startup</div><span class="incident-badge blue">INCIDENT 03 · Kiosk</span><h1>PC마다 달라지는 환경과<br><span class="gradient">서비스 시작 순서 문제</span></h1><p>설치 방법을 문서로 설명하는 대신 실행 환경과 준비 조건을 Docker Compose 구성으로 고정한 기록입니다.</p><div class="detail-meta"><span>Docker Compose</span><span>MySQL</span><span>Healthcheck</span><span>Nginx</span></div></div></section>
+  <div class="wrap article-layout"><article class="article-body">
+    <section class="article-block" id="context"><span>01 · PROBLEM</span><h2>신규 PC에서 설치 상태와 실행 순서에 따라 연결 오류가 반복됐습니다.</h2><p>키오스크 애플리케이션은 Node.js, MySQL, Nginx를 함께 사용합니다. 각 도구를 수동 설치하면 버전과 설정이 달라졌고, 애플리케이션이 DB보다 먼저 시작하면 초기 연결이 실패했습니다.</p></section>
+    <section class="article-block" id="observation"><span>02 · OBSERVATION</span><h2>프로세스가 실행 중인 것과 서비스가 준비된 것은 달랐습니다.</h2><p>컨테이너 상태, DB 연결 가능 시점, 애플리케이션 시작 로그를 순서대로 확인했습니다. DB 프로세스는 실행됐지만 초기화가 끝나기 전에 애플리케이션이 연결을 시도하는 조건을 구분했습니다.</p><div class="evidence-box">확인한 신호: 컨테이너 상태 · DB 연결 가능 여부 · 초기화 완료 시점 · 애플리케이션 재시작 여부</div></section>
+    <section class="article-block" id="hypothesis"><span>03 · HYPOTHESIS</span><h2>단순한 시작 순서가 아니라 준비 상태 확인이 필요했습니다.</h2><p>컨테이너를 먼저 실행하는 설정만으로는 DB 초기화 시간을 보장할 수 없습니다. 프로세스 순서가 아니라 실제 연결 가능한 상태를 기준으로 의존성을 표현해야 했습니다.</p></section>
+    <section class="article-block" id="cause"><span>04 · ROOT CAUSE</span><h2>환경과 준비 조건이 코드 밖의 암묵적인 절차로 남아 있었습니다.</h2><p>필요한 버전, 환경변수, 볼륨, 서비스 준비 순서가 작업자 기억과 설치 문서에 의존했습니다. 새로운 PC에서 같은 상태를 재현하기 어려운 구조였습니다.</p></section>
+    <section class="article-block" id="fix"><span>05 · FIX</span><h2>App·DB·Nginx를 Compose로 묶고 DB 헬스체크를 추가했습니다.</h2><p>실행 환경과 설정을 컨테이너로 고정하고, DB 헬스체크가 통과한 뒤 애플리케이션이 시작하도록 의존성을 명시했습니다. 데이터는 볼륨으로 분리했습니다.</p><ul class="detail-list"><li>서비스별 이미지·환경변수·볼륨 명시</li><li>DB 연결 가능 상태를 확인하는 헬스체크</li><li>준비 상태를 기준으로 애플리케이션 시작</li></ul></section>
+    <section class="article-block" id="result"><span>06 · RESULT</span><h2>신규 PC에서도 같은 구성과 명령으로 서비스를 실행합니다.</h2><p>수동 설치 차이를 줄이고 DB 초기화 시점에 따른 연결 실패를 시작 단계에서 제어할 수 있게 됐습니다.</p><div class="result-box">검증 결과: DB 헬스체크 통과 후 애플리케이션이 시작되고 공개 화면과 관리자 기능이 같은 데이터베이스에 연결됨</div></section>
+    <section class="article-block" id="prevention"><span>07 · PREVENTION</span><h2>서비스 추가 시 준비 조건과 데이터 수명 주기를 구성에 남깁니다.</h2><p>새 서비스는 단순 실행 순서가 아니라 헬스체크, 실패 시 재시작 정책, 영속 데이터 위치를 함께 정의하도록 기준을 정리했습니다.</p></section>
+  </article><aside class="article-nav"><b>Compose 시작 순서</b><a href="#context">문제 상황</a><a href="#observation">관찰한 현상</a><a href="#hypothesis">가설과 확인</a><a href="#cause">실제 원인</a><a href="#fix">해결</a><a href="#result">결과</a><a href="#prevention">재발 방지</a></aside></div>
+</main>
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Incident 03 · Student Progress Kiosk</span></div></footer>
+</body>
+</html>

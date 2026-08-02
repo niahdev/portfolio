@@ -23,6 +23,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
+      - name: Generate public service status
+        run: node scripts/generate-status.mjs
+
       - name: Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.OVH_SSH_KEY }}
@@ -43,8 +46,12 @@ jobs:
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='deploy/' \
+            --exclude='scripts/' \
             -e 'ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes' \
             ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
 
       - name: Verify deployment
-        run: curl --fail --silent --show-error https://pt.niah.site/ > /dev/null
+        run: |
+          for path in / /systems/ /incidents/ /lab/; do
+            curl --fail --silent --show-error "https://pt.niah.site$path" > /dev/null
+          done

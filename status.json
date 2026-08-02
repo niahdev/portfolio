@@ -1,0 +1,31 @@
+{
+  "generatedAt": null,
+  "deployment": {
+    "commit": null,
+    "deployedAt": null
+  },
+  "services": [
+    {
+      "name": "ER-Dodge",
+      "url": "https://niah.site/",
+      "status": "pending",
+      "responseMs": null,
+      "environment": "OVHcloud · Docker"
+    },
+    {
+      "name": "gif_lower",
+      "url": "https://gif.niah.site/",
+      "status": "pending",
+      "responseMs": null,
+      "environment": "OVHcloud · Docker"
+    },
+    {
+      "name": "Portfolio",
+      "url": "https://pt.niah.site/",
+      "status": "pending",
+      "responseMs": null,
+      "environment": "Nginx · GitHub Actions"
+    }
+  ]
+}
+
