@@ -19,7 +19,7 @@
 
       <article class="detail-section" id="compression"><small>02 · COMPRESSION</small><h2>모든 후보는 원본에서 다시 생성합니다.</h2><p>이전 압축 결과를 다음 단계의 입력으로 사용하면 손실이 누적됩니다. 각 후보를 원본에서 다시 생성하고 팔레트, FPS, 해상도의 순서로 조건을 조정해 품질 저하의 범위를 예측할 수 있게 했습니다.</p><div class="architecture-flow"><div><b>Palette</b><span>색상 수 탐색</span></div><div><b>FPS</b><span>프레임 빈도 조정</span></div><div><b>Resolution</b><span>최종 해상도 조정</span></div></div></article>
 
-      <article class="detail-section" id="operation"><small>03 · OPERATIONS</small><h2>무거운 작업이 서버 전체로 번지지 않게 했습니다.</h2><p>FFmpeg 작업이 동시에 시작되며 CPU와 메모리가 고갈되는 문제를 확인했습니다. 작업 큐, 동시 실행 제한, IP별 생성 제한, 완료·실패 파일 자동 정리를 함께 적용했습니다.</p><ul class="detail-list"><li>정해진 개수의 FFmpeg 작업만 동시에 실행</li><li>IP별 작업 생성 제한으로 요청 폭주 방지</li><li>완료와 실패 시점에 임시 파일 자동 정리</li></ul><p class="detail-inline-link"><a class="text-link" href="./incidents/ffmpeg-cpu.html">전체 문제 해결 기록 보기 <span>→</span></a></p></article>
+      <article class="detail-section" id="operation"><small>03 · OPERATIONS</small><h2>무거운 작업이 서버 전체로 번지지 않게 했습니다.</h2><p>FFmpeg 작업이 동시에 시작되며 CPU와 메모리가 고갈되는 문제를 확인했습니다. 작업 큐, 동시 실행 제한, IP별 생성 제한, 완료·실패 파일 자동 정리를 함께 적용했습니다.</p><ul class="detail-list"><li>정해진 개수의 FFmpeg 작업만 동시에 실행</li><li>IP별 작업 생성 제한으로 요청 폭주 방지</li><li>완료와 실패 시점에 임시 파일 자동 정리</li></ul><p class="detail-inline-link"><a class="text-link" href="./incidents/ffmpeg-concurrency/">전체 문제 해결 기록 보기 <span>→</span></a></p></article>
 
       <article class="detail-section" id="deployment"><small>04 · DEPLOYMENT</small><h2>Docker와 Nginx로 실제 서비스 중입니다.</h2><p>FFmpeg가 포함된 실행 환경을 컨테이너로 고정하고 Nginx에서 업로드 크기, 요청 시간, HTTPS를 관리합니다. 현재 공개 도메인에서 직접 사용할 수 있습니다.</p></article>
     </div>

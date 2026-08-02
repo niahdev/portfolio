@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FFmpeg 동시 실행으로 발생한 서버 응답 지연과 작업 큐 적용 기록">
+  <title>FFmpeg 동시 실행 부하 | 문제 해결 기록</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="nav-shell"><div class="wrap nav"><a class="logo" href="../../">PARK<i>.KUNRYUL</i></a><nav class="nav-links" aria-label="주요 탐색"><a href="../../systems/">Systems</a><a href="../">Incidents</a><a href="../../lab/">Lab</a></nav><div class="nav-actions"><a class="btn" href="../">← Incidents</a><a class="btn primary" href="https://github.com/niahdev/gif_lower" target="_blank" rel="noreferrer">GitHub ↗</a></div></div></header>
+<main>
+  <section class="article-hero"><div class="wrap"><div class="breadcrumb"><a href="../../">Portfolio</a> / <a href="../">Incidents</a> / FFmpeg Concurrency</div><div class="incident-kicker"><span class="incident-badge">INCIDENT 01</span><span>2026.07</span><span>gif lower</span><span>Backend · Server Resource</span></div><h1>FFmpeg 동시 실행으로 인한<br><span class="gradient">서버 응답 지연</span></h1><p>CPU 사용량이 큰 변환 작업을 HTTP 요청과 분리하고, 동시 실행 수를 제한하도록 작업 구조를 변경한 사례입니다.</p><div class="detail-meta"><span class="status-resolved">Resolved</span><span>Node.js</span><span>FFmpeg</span><span>Job Queue</span><span>Docker</span></div></div></section>
+
+  <div class="wrap article-layout incident-article-layout">
+    <aside class="article-nav incident-info"><b>Incident Summary</b><dl><div><dt>Project</dt><dd>gif lower</dd></div><div><dt>Category</dt><dd>Server Resource</dd></div><div><dt>Environment</dt><dd>Node.js · Docker · Linux</dd></div><div><dt>Status</dt><dd class="status-text resolved">Resolved</dd></div><div><dt>Impact</dt><dd>API response delay risk</dd></div><div><dt>Resolution</dt><dd>Concurrency control</dd></div></dl><nav aria-label="문서 목차"><a href="#overview">개요</a><a href="#situation">문제 상황</a><a href="#observation">관찰한 현상</a><a href="#hypothesis">처음 세운 가설</a><a href="#verification">확인 과정</a><a href="#cause">실제 원인</a><a href="#options">검토한 방법</a><a href="#action">선택한 조치</a><a href="#result">결과</a><a href="#prevention">재발 방지</a><a href="#remaining">남은 개선점</a><a href="#learning">배운 점</a></nav></aside>
+    <article class="article-body">
+      <section class="article-block" id="overview"><span>01 · OVERVIEW</span><h2>개요</h2><p>gif lower는 사용자가 업로드한 GIF 파일을 FFmpeg로 변환해 용량을 줄인 결과물을 제공하는 서비스입니다. 변환 기능 자체는 정상적으로 동작했지만, 여러 요청이 동시에 들어오는 상황에서는 FFmpeg 프로세스가 한꺼번에 실행될 수 있는 구조였습니다.</p></section>
+      <section class="article-block" id="situation"><span>02 · PROBLEM</span><h2>문제 상황</h2><p>각 변환 요청은 CPU를 많이 사용하는 FFmpeg 작업을 생성합니다. 요청 하나만 처리할 때는 문제가 없었지만, 여러 사용자의 요청이 겹치면 실행 중인 프로세스가 증가하고 API 서버까지 영향을 받을 가능성이 있었습니다.</p></section>
+      <section class="article-block" id="observation"><span>03 · OBSERVATION</span><h2>관찰한 현상</h2><ul class="detail-list"><li>요청마다 별도의 FFmpeg 프로세스가 생성됐습니다.</li><li>변환 작업의 실행 시간 동안 CPU 사용량이 증가했습니다.</li><li>실행 중인 작업 수를 제한하는 장치가 없었습니다.</li><li>API 요청 처리와 파일 변환 작업이 같은 흐름 안에서 실행됐습니다.</li></ul><div class="evidence-box">수치가 남아 있지 않은 부분은 임의로 만들지 않았습니다. 확인 기준은 요청 수, FFmpeg 프로세스 수, 작업 완료 여부와 일반 API 응답 가능 여부였습니다.</div></section>
+      <section class="article-block" id="hypothesis"><span>04 · HYPOTHESIS</span><h2>처음 세운 가설</h2><ul class="plain-list"><li>파일 업로드 크기가 지나치게 큰지</li><li>네트워크 전송 시간이 병목인지</li><li>FFmpeg 프로세스 우선순위가 높은지</li><li>동시 실행되는 프로세스 수가 자원을 경합하는지</li></ul></section>
+      <section class="article-block" id="verification"><span>05 · VERIFICATION</span><h2>확인 과정</h2><p>단일 요청과 동시 요청을 나눠 실행 중인 FFmpeg 프로세스 수와 작업 완료 흐름을 비교했습니다. 파일 하나의 처리보다 요청이 겹칠 때 실행 프로세스가 함께 증가하는 구조를 우선 확인했습니다.</p><div class="evidence-box">확인 흐름: 단일 요청 → 동시 요청 → 프로세스 수 비교 → 일반 API 응답 여부 확인</div></section>
+      <section class="article-block" id="cause"><span>06 · ROOT CAUSE</span><h2>실제 원인</h2><p>문제의 원인은 FFmpeg 자체가 아니라 CPU 집약적인 작업을 제한 없이 동시에 실행할 수 있는 구조였습니다. HTTP 요청이 들어올 때마다 변환 작업을 바로 시작했기 때문에 요청 수가 실행 중인 프로세스 수로 이어질 수 있었습니다.</p></section>
+      <section class="article-block" id="options"><span>07 · OPTIONS</span><h2>검토한 해결 방법</h2><ol class="number-list"><li>파일 업로드 크기만 제한하는 방법</li><li>일정 수 이상의 요청을 바로 거부하는 방법</li><li>FFmpeg 프로세스의 우선순위를 낮추는 방법</li><li>작업 큐를 두고 동시 실행 수를 제한하는 방법</li></ol></section>
+      <section class="article-block" id="action"><span>08 · ACTION</span><h2>선택한 조치</h2><p>변환 요청을 바로 실행하지 않고 작업 큐에 등록하도록 변경했습니다. 실행 중인 변환 작업 수를 제한하고 작업이 끝난 뒤 다음 작업을 처리하도록 구성했습니다.</p><pre class="code-block"><code>const queue = [];
+let activeJobs = 0;
+const maxConcurrentJobs = 2;
+
+function enqueue(job) {
+  queue.push(job);
+  processNext();
+}
+
+async function processNext() {
+  if (activeJobs >= maxConcurrentJobs || queue.length === 0) return;
+
+  const job = queue.shift();
+  activeJobs += 1;
+
+  try {
+    await runFfmpeg(job);
+  } finally {
+    activeJobs -= 1;
+    processNext();
+  }
+}</code></pre></section>
+      <section class="article-block" id="result"><span>09 · RESULT</span><h2>결과</h2><ul class="detail-list"><li>동시에 실행되는 FFmpeg 작업 수를 제한했습니다.</li><li>API 요청 처리와 CPU 집약적 변환 작업의 실행 흐름을 분리했습니다.</li><li>서버 자원이 특정 시점에 집중되는 위험을 줄였습니다.</li><li>재시도, 대기 상태, 작업 만료 기능을 추가하기 쉬운 구조가 됐습니다.</li></ul><div class="result-box">검증 결과: 대기 작업과 실행 작업이 분리되고, 실행 중인 FFmpeg 프로세스 수가 설정값 안에서 유지됩니다.</div></section>
+      <section class="article-block" id="prevention"><span>10 · PREVENTION</span><h2>재발 방지</h2><p>CPU 집약 작업을 추가할 때 동시성, 대기열, 실패 처리, 임시 파일 정리 시점을 기능 구현과 함께 검토하도록 기준을 남겼습니다.</p></section>
+      <section class="article-block" id="remaining"><span>11 · NEXT</span><h2>남은 개선점</h2><p>현재 구조는 단일 서버의 메모리 내 작업 큐를 기준으로 합니다. 서버가 재시작되면 대기 중인 작업 정보가 사라질 수 있으므로 향후 Redis 기반 큐나 별도 Worker 구조로 분리할 수 있습니다.</p></section>
+      <section class="article-block" id="learning"><span>12 · LEARNING</span><h2>배운 점</h2><p>기능이 정상적으로 실행되는 것과 운영 환경에서 안전하게 실행되는 것은 다른 문제였습니다. CPU 사용량이 큰 작업은 요청 처리와 분리하고 서버가 감당할 수 있는 범위 안에서 실행되도록 제어해야 한다는 점을 확인했습니다.</p></section>
+    </article>
+  </div>
+</main>
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Incident 01 · Resolved</span></div></footer>
+</body>
+</html>

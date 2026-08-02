@@ -157,6 +157,11 @@ section { padding: 92px 0; }
 .project-more a:hover { color: var(--cyan); }
 
 /* Main systems overview */
+.lifecycle-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.lifecycle-grid article { min-height: 220px; padding: 25px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(145deg, rgba(20, 28, 49, 0.92), rgba(12, 18, 34, 0.97)); }
+.lifecycle-grid article > span { color: var(--cyan); font: 800 11px/1 "JetBrains Mono", Consolas, monospace; }
+.lifecycle-grid h3 { margin: 43px 0 8px; font-size: 22px; }
+.lifecycle-grid p { margin: 0; color: var(--muted); font-size: 14px; }
 .service-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .service-card { min-height: 390px; padding: 30px; display: flex; flex-direction: column; gap: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(20, 28, 49, 0.95), rgba(12, 18, 34, 0.98)); box-shadow: 0 22px 58px rgba(0, 0, 0, 0.18); }
 .service-er { background: linear-gradient(145deg, rgba(22, 51, 91, 0.9), rgba(10, 22, 42, 0.98)); }
@@ -198,6 +203,13 @@ section { padding: 92px 0; }
 .infra-grid article > span { color: var(--cyan); font: 800 12px/1 "JetBrains Mono", Consolas, monospace; }
 .infra-grid h3 { margin: 40px 0 10px; font-size: 23px; }
 .infra-grid p { margin: 0; color: var(--muted); font-size: 15px; }
+.other-project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.other-project-grid > a { min-height: 250px; padding: 28px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(20, 28, 49, 0.92), rgba(12, 18, 34, 0.97)); transition: transform 0.2s, border-color 0.2s; }
+.other-project-grid > a:hover { transform: translateY(-3px); border-color: rgba(114, 173, 255, 0.4); }
+.other-project-grid span { color: var(--cyan); font: 800 11px/1 "JetBrains Mono", Consolas, monospace; letter-spacing: 0.09em; }
+.other-project-grid h3 { margin: 35px 0 10px; font-size: 27px; letter-spacing: -0.035em; }
+.other-project-grid p { margin: 0; color: var(--muted); }
+.other-project-grid b { margin-top: auto; padding-top: 20px; color: #acd2ff; font-size: 14px; }
 
 /* Systems, incidents and lab pages */
 .page-hero { padding: 96px 0 60px; border-bottom: 1px solid var(--line); }
@@ -244,6 +256,7 @@ section { padding: 92px 0; }
 .incident-list-card p { margin: 0; color: var(--muted); font-size: 15px; }
 .incident-list-card > b { color: #a9d1ff; font-size: 14px; }
 .incident-facts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 18px; }
+.incident-list-expanded .incident-facts { grid-template-columns: repeat(4, 1fr); }
 .incident-facts div { padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255, 255, 255, 0.025); }
 .incident-facts dt { color: var(--cyan); font-size: 11px; font-weight: 900; }
 .incident-facts dd { margin: 3px 0 0; color: #d1daeb; font-size: 13px; }
@@ -251,18 +264,37 @@ section { padding: 92px 0; }
 .article-hero { padding: 84px 0 54px; border-bottom: 1px solid var(--line); }
 .article-hero h1 { max-width: 980px; margin: 15px 0 19px; font-size: clamp(42px, 5.6vw, 68px); }
 .article-hero p { max-width: 800px; margin: 0; color: var(--muted); font-size: 18px; }
+.incident-kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; color: var(--muted); font: 700 12px/1.4 "JetBrains Mono", Consolas, monospace; }
+.incident-kicker .incident-badge { font-family: inherit; }
 .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) 270px; align-items: start; gap: 50px; padding: 68px 0; }
 .article-body { display: grid; gap: 50px; }
+.incident-article-layout .article-body { grid-column: 1; grid-row: 1; }
+.incident-article-layout .incident-info { grid-column: 2; grid-row: 1; }
 .article-block { scroll-margin-top: 96px; }
 .article-block > span { color: var(--cyan); font: 900 11px/1 "JetBrains Mono", Consolas, monospace; letter-spacing: 0.12em; }
 .article-block h2 { margin: 8px 0 14px; font-size: 28px; line-height: 1.3; letter-spacing: -0.035em; }
 .article-block p { margin: 0; color: var(--muted); }
 .evidence-box { margin-top: 18px; padding: 18px; border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; background: rgba(114, 173, 255, 0.055); color: #d5e5ff; }
 .result-box { margin-top: 18px; padding: 20px; border: 1px solid rgba(124, 233, 170, 0.2); border-radius: 13px; background: rgba(124, 233, 170, 0.055); color: #c9f8dc; }
+.investigating-box { border-color: rgba(255, 194, 102, 0.22); background: rgba(255, 194, 102, 0.055); color: #ffe0ad; }
 .article-nav { position: sticky; top: 96px; padding: 22px; border: 1px solid var(--line); border-radius: 15px; background: rgba(17, 24, 43, 0.88); }
 .article-nav b { display: block; margin-bottom: 9px; }
 .article-nav a { display: block; padding: 9px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 700; }
 .article-nav a:hover { color: var(--cyan); }
+.incident-info dl { margin: 0 0 18px; }
+.incident-info dl div { padding: 10px 0; border-top: 1px solid var(--line); }
+.incident-info dt { color: var(--faint); font-size: 10px; font-weight: 900; letter-spacing: 0.09em; text-transform: uppercase; }
+.incident-info dd { margin: 2px 0 0; color: #d8e1f1; font-size: 13px; font-weight: 700; }
+.incident-info nav { margin-top: 6px; }
+.status-text.resolved, .status-resolved { color: #aaf1c4; }
+.status-text.investigating, .status-investigating { color: var(--amber); }
+.plain-list, .number-list { display: grid; gap: 10px; margin: 18px 0 0; padding-left: 22px; color: #d2daea; }
+.plain-list li::marker { color: var(--blue); }
+.number-list li::marker { color: var(--cyan); font-weight: 900; }
+.code-block { overflow-x: auto; margin: 18px 0 0; padding: 19px; border: 1px solid rgba(114, 173, 255, 0.16); border-radius: 13px; background: #050913; color: #dce8ff; white-space: pre; font: 13px/1.75 "JetBrains Mono", Consolas, monospace; }
+.code-comparison { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
+.code-comparison > div > small { color: var(--muted); }
+.code-comparison .code-block { margin-top: 7px; height: calc(100% - 29px); }
 
 .lab-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .lab-card { padding: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(20, 28, 49, 0.94), rgba(12, 18, 34, 0.97)); }
@@ -376,6 +408,9 @@ footer { padding: 18px 0 52px; color: var(--faint); font-size: 13px; }
   .incident-preview, .infra-grid article { min-height: 0; }
   .system-card, .article-layout { grid-template-columns: 1fr; }
   .article-nav { position: static; }
+  .lifecycle-grid { grid-template-columns: repeat(2, 1fr); }
+  .incident-article-layout .incident-info { grid-column: 1; grid-row: 1; }
+  .incident-article-layout .article-body { grid-column: 1; grid-row: 2; }
 }
 
 @media (max-width: 760px) {
@@ -387,6 +422,7 @@ footer { padding: 18px 0 52px; color: var(--faint); font-size: 13px; }
   .incident-summary { grid-template-columns: 1fr; }
   .incident-summary code { justify-self: start; }
   .service-grid, .lab-grid { grid-template-columns: 1fr; }
+  .other-project-grid { grid-template-columns: 1fr; }
   .operation-strip { grid-template-columns: 1fr; }
   .subsection-head, .status-summary { align-items: flex-start; flex-direction: column; }
   .incident-list-card { grid-template-columns: 1fr; }
@@ -452,9 +488,14 @@ footer { padding: 18px 0 52px; color: var(--faint); font-size: 13px; }
   .system-card { padding: 23px; }
   .system-diagram { grid-template-columns: 1fr; }
   .incident-facts { grid-template-columns: 1fr; }
+  .incident-list-expanded .incident-facts { grid-template-columns: 1fr; }
   .article-hero { padding: 62px 0 44px; }
   .article-hero h1 { font-size: 40px; }
   .article-layout { padding: 52px 0; }
+  .lifecycle-grid { grid-template-columns: 1fr; }
+  .lifecycle-grid article { min-height: 0; }
+  .lifecycle-grid h3 { margin-top: 25px; }
+  .code-comparison { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

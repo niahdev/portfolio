@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RKE2 Kubernetes 클러스터에서 IngressClass가 존재하지 않은 문제 분석 기록">
+  <title>Kubernetes IngressClass 부재 | 문제 분석 기록</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="nav-shell"><div class="wrap nav"><a class="logo" href="../../">PARK<i>.KUNRYUL</i></a><nav class="nav-links" aria-label="주요 탐색"><a href="../../systems/">Systems</a><a href="../">Incidents</a><a href="../../lab/">Lab</a></nav><div class="nav-actions"><a class="btn" href="../">← Incidents</a><a class="btn primary" href="../../lab/">Infrastructure Lab →</a></div></div></header>
+<main>
+  <section class="article-hero"><div class="wrap"><div class="breadcrumb"><a href="../../">Portfolio</a> / <a href="../">Incidents</a> / Kubernetes IngressClass</div><div class="incident-kicker"><span class="incident-badge blue">INCIDENT 03</span><span>2026.08</span><span>RKE2 Lab</span><span>Infrastructure · Networking</span></div><h1>Kubernetes 클러스터에<br><span class="gradient">IngressClass가 존재하지 않은 문제</span></h1><p>Ingress YAML만 수정하지 않고 요청을 처리할 Controller와 클러스터 구성을 먼저 확인하며 원인 범위를 좁힌 기록입니다.</p><div class="detail-meta"><span class="status-investigating">Investigating</span><span>Kubernetes</span><span>RKE2</span><span>Ingress</span><span>Networking</span></div></div></section>
+
+  <div class="wrap article-layout incident-article-layout">
+    <aside class="article-nav incident-info"><b>Incident Summary</b><dl><div><dt>Project</dt><dd>RKE2 Lab</dd></div><div><dt>Category</dt><dd>Infrastructure</dd></div><div><dt>Environment</dt><dd>Kubernetes · RKE2 · Linux</dd></div><div><dt>Status</dt><dd class="status-text investigating">Investigating</dd></div><div><dt>Impact</dt><dd>Ingress exposure unavailable</dd></div><div><dt>Next action</dt><dd>Controller verification</dd></div></dl><nav aria-label="문서 목차"><a href="#overview">개요</a><a href="#situation">문제 상황</a><a href="#observation">관찰한 현상</a><a href="#hypothesis">처음 세운 가설</a><a href="#verification">확인 과정</a><a href="#cause">실제 원인 범위</a><a href="#options">검토할 방법</a><a href="#action">선택한 조치</a><a href="#result">현재 결과</a><a href="#prevention">재발 방지</a><a href="#remaining">남은 개선점</a><a href="#learning">배운 점</a></nav></aside>
+    <article class="article-body">
+      <section class="article-block" id="overview"><span>01 · OVERVIEW</span><h2>개요</h2><p>RKE2 기반 Kubernetes 클러스터에서 서비스를 Ingress로 외부에 노출하는 테스트를 진행했습니다. Ingress 리소스를 작성하기 전에 클러스터 구성을 확인했지만 사용할 수 있는 IngressClass가 존재하지 않았습니다.</p></section>
+      <section class="article-block" id="situation"><span>02 · PROBLEM</span><h2>문제 상황</h2><p>Ingress를 구성하기 위해 현재 등록된 IngressClass를 조회했으나 리소스가 존재하지 않는다는 결과가 반환됐습니다.</p><pre class="code-block"><code>$ kubectl get ingressclass
+No resources found</code></pre></section>
+      <section class="article-block" id="observation"><span>03 · OBSERVATION</span><h2>관찰한 현상</h2><ul class="detail-list"><li>IngressClass 목록이 비어 있었습니다.</li><li>Ingress에서 지정할 class 이름을 확인할 수 없었습니다.</li><li>Ingress 리소스만 작성해도 실제 요청을 처리할 주체가 불분명했습니다.</li><li>애플리케이션 리소스와 클러스터 애드온 구성을 분리해 봐야 했습니다.</li></ul></section>
+      <section class="article-block" id="hypothesis"><span>04 · HYPOTHESIS</span><h2>처음 세운 가설</h2><ul class="plain-list"><li>Service 또는 Pod가 Ready 상태가 아닌지</li><li>Ingress YAML의 apiVersion이 올바르지 않은지</li><li>ingressClassName 지정이 누락됐는지</li><li>Ingress Controller가 설치되지 않았는지</li><li>Controller는 있지만 IngressClass를 등록하지 않았는지</li></ul></section>
+      <section class="article-block" id="verification"><span>05 · VERIFICATION</span><h2>확인 과정</h2><p>Pod와 Service가 정상이어도 Ingress 요청을 처리할 Controller가 없다면 Ingress 리소스만으로 외부 연결이 만들어지지 않습니다. 먼저 클러스터 전역의 Controller 후보와 RKE2 애드온 구성을 확인하는 순서로 범위를 좁혔습니다.</p><pre class="code-block"><code>kubectl get pods -n kube-system
+kubectl get daemonset -A
+kubectl get deployment -A
+kubectl get helmchart -A</code></pre></section>
+      <section class="article-block" id="cause"><span>06 · ROOT CAUSE RANGE</span><h2>실제 원인 범위</h2><p>아직 원인을 확정한 상태는 아닙니다. 현재 클러스터에는 사용할 수 있는 Ingress Controller가 설치되지 않았거나 Controller가 IngressClass를 등록하지 않은 상태일 가능성으로 범위를 좁혔습니다.</p><div class="evidence-box">확정된 사실: kubectl get ingressclass 결과가 비어 있음. 확인 중인 범위: Controller 설치·등록 상태.</div></section>
+      <section class="article-block" id="options"><span>07 · OPTIONS</span><h2>검토할 해결 방법</h2><ol class="number-list"><li>RKE2 기본 Ingress Controller가 비활성화됐는지 확인</li><li>기존 HelmChart 또는 Controller 배포 상태 복구</li><li>환경에 맞는 Ingress Controller 신규 설치</li><li>Controller가 생성한 IngressClass 이름을 명시해 테스트</li></ol></section>
+      <section class="article-block" id="action"><span>08 · ACTION</span><h2>선택한 다음 조치</h2><ol class="number-list"><li>kube-system 네임스페이스의 Controller Pod 확인</li><li>RKE2의 기본 Ingress 구성 여부 확인</li><li>설치된 HelmChart 또는 DaemonSet 확인</li><li>Controller 설치 후 IngressClass 생성 여부 확인</li><li>ingressClassName을 지정한 테스트 Ingress 적용</li><li>도메인 또는 hosts 설정으로 외부 접근 검증</li></ol></section>
+      <section class="article-block" id="result"><span>09 · CURRENT RESULT</span><h2>현재 결과</h2><p>Ingress가 동작하지 않는 원인을 YAML 문법만의 문제로 보지 않고 클러스터의 Controller 구성으로 조사 범위를 옮겼습니다. 해결 완료가 아니므로 상태는 Investigating으로 유지합니다.</p><div class="result-box investigating-box">현재 판단: 애플리케이션 리소스보다 Ingress Controller와 IngressClass 등록 상태를 먼저 검증해야 합니다.</div></section>
+      <section class="article-block" id="prevention"><span>10 · PREVENTION</span><h2>재발 방지</h2><p>해결 후에는 사용한 Controller, IngressClass 이름, 설치 방식과 검증 명령을 클러스터 구성 문서에 남기고 새 환경 점검 항목에 포함할 예정입니다.</p></section>
+      <section class="article-block" id="remaining"><span>11 · NEXT</span><h2>남은 개선점</h2><ul class="detail-list"><li>적용한 Controller와 IngressClass 이름 기록</li><li>테스트 Service와 외부 접근 방법 기록</li><li>정상 응답 화면과 리소스 상태 증거 추가</li><li>Controller 재시작과 노드 변경 상황 검증</li></ul></section>
+      <section class="article-block" id="learning"><span>12 · LEARNING</span><h2>배운 점</h2><p>Ingress가 동작하지 않는다고 처음부터 YAML 문법만 수정하지 않았습니다. 애플리케이션 리소스와 클러스터 리소스를 분리하고 요청을 실제로 처리할 Controller가 존재하는지부터 확인해야 했습니다.</p></section>
+    </article>
+  </div>
+</main>
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Incident 03 · Investigating</span></div></footer>
+</body>
+</html>

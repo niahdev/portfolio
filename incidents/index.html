@@ -3,26 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="운영 중 발견한 문제의 관찰, 원인 분석, 해결과 재발 방지 기록">
+  <meta name="description" content="개발과 운영 과정에서 마주친 문제의 관찰, 분석, 해결과 재발 방지 기록">
   <title>문제 해결 기록 | 박건률</title>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
 <header class="nav-shell"><div class="wrap nav"><a class="logo" href="../">PARK<i>.KUNRYUL</i></a><nav class="nav-links"><a href="../">About</a><a href="../systems/">Systems</a><a href="./">Incidents</a><a href="../lab/">Lab</a><a href="../#contact">Contact</a></nav><div class="nav-actions"><a class="btn" href="../">← Portfolio</a><a class="btn primary" href="https://github.com/niahdev" target="_blank" rel="noreferrer">GitHub ↗</a></div></div></header>
-
 <main>
-  <section class="page-hero"><div class="wrap"><div class="breadcrumb"><a href="../">Portfolio</a> / Incidents</div><div class="section-tag">Incidents &amp; Improvements</div><h1>문제를 고친 결과보다<br><span class="gradient">원인을 찾은 과정을 기록합니다.</span></h1><p>서비스 운영 중 발견한 현상을 재현하고, 가설을 검증하고, 다시 발생하지 않도록 구조를 바꾼 기록입니다.</p></div></section>
-
-  <section class="page-section"><div class="wrap"><div class="subsection-head"><div><div class="section-tag">Incident Archive</div><h2>문제 해결 기록</h2></div><p>각 카드에는 증상·영향 범위·원인·조치·결과만 요약했습니다.</p></div>
-    <div class="incident-list">
-      <a class="incident-list-card" href="./ffmpeg-cpu.html"><span class="incident-badge">INCIDENT 01</span><div><h2>FFmpeg 동시 실행으로 인한 CPU 부하</h2><p>여러 압축 요청이 겹치며 처리 지연이 서버 전체 응답에 영향을 주는 문제</p><dl class="incident-facts"><div><dt>증상</dt><dd>동시 요청 시 지연</dd></div><div><dt>영향</dt><dd>변환·일반 응답</dd></div><div><dt>원인</dt><dd>무제한 프로세스</dd></div><div><dt>조치</dt><dd>Queue·실행 제한</dd></div><div><dt>결과</dt><dd>자원 범위 통제</dd></div></dl></div><b>읽기 →</b></a>
-      <a class="incident-list-card" href="./api-fallback.html"><span class="incident-badge amber">INCIDENT 02</span><div><h2>외부 API 장애의 분석 기능 전파</h2><p>기준 데이터 제공처의 일시 오류가 사용자 분석 화면 중단으로 이어지는 문제</p><dl class="incident-facts"><div><dt>증상</dt><dd>분석 화면 중단</dd></div><div><dt>영향</dt><dd>ER-Dodge 분석</dd></div><div><dt>원인</dt><dd>실시간 응답 의존</dd></div><div><dt>조치</dt><dd>Cache·Fallback</dd></div><div><dt>결과</dt><dd>기능 지속</dd></div></dl></div><b>읽기 →</b></a>
-      <a class="incident-list-card" href="./compose-startup.html"><span class="incident-badge blue">INCIDENT 03</span><div><h2>PC별 실행 환경과 서비스 시작 순서 차이</h2><p>수동 설치 상태와 DB 준비 시점 차이로 신규 PC에서 연결 오류가 반복되는 문제</p><dl class="incident-facts"><div><dt>증상</dt><dd>초기 연결 실패</dd></div><div><dt>영향</dt><dd>Kiosk 실행</dd></div><div><dt>원인</dt><dd>암묵적 시작 순서</dd></div><div><dt>조치</dt><dd>Compose·Healthcheck</dd></div><div><dt>결과</dt><dd>동일 실행 환경</dd></div></dl></div><b>읽기 →</b></a>
+  <section class="page-hero"><div class="wrap"><div class="breadcrumb"><a href="../">Portfolio</a> / Incidents</div><div class="section-tag">Incidents &amp; Improvements</div><h1>문제가 생겼을 때,<br><span class="gradient">원인을 끝까지 추적합니다.</span></h1><p>개발과 운영 과정에서 마주친 문제를 관찰, 분석, 해결, 재발 방지의 순서로 기록합니다.</p></div></section>
+  <section class="page-section"><div class="wrap"><div class="subsection-head"><div><div class="section-tag">Incident Archive</div><h2>문제 해결 기록</h2></div><p>기록이 많아지기 전까지 필터 없이 사건의 핵심과 기술 태그만 보여줍니다.</p></div>
+    <div class="incident-list incident-list-expanded">
+      <a class="incident-list-card" href="./ffmpeg-concurrency/"><span class="incident-badge">INCIDENT 01 · SERVER RESOURCE</span><div><h2>FFmpeg 동시 실행으로 인한 서버 응답 지연</h2><p>GIF 변환 요청이 동시에 처리되면서 여러 FFmpeg 프로세스가 서버 CPU를 점유했습니다.</p><dl class="incident-facts"><div><dt>영향</dt><dd>API 응답 지연 위험</dd></div><div><dt>원인</dt><dd>요청마다 즉시 실행</dd></div><div><dt>조치</dt><dd>Queue·동시성 제한</dd></div><div><dt>결과</dt><dd>변환 작업 분리</dd></div></dl><div class="meta"><span>Node.js</span><span>FFmpeg</span><span>Queue</span><span>Resource Control</span></div></div><b>상세 보기 →</b></a>
+      <a class="incident-list-card" href="./mysql-auto-increment/"><span class="incident-badge amber">INCIDENT 02 · DATABASE</span><div><h2>MySQL 기본키 설정 누락으로 인한 INSERT 실패</h2><p>학생 데이터를 등록하는 과정에서 ID 기본값과 관련된 MySQL 오류가 발생했습니다.</p><dl class="incident-facts"><div><dt>영향</dt><dd>신규 데이터 저장 실패</dd></div><div><dt>원인</dt><dd>AUTO_INCREMENT 누락</dd></div><div><dt>조치</dt><dd>스키마·쿼리 수정</dd></div><div><dt>결과</dt><dd>정상 등록·초기화 반영</dd></div></dl><div class="meta"><span>MySQL</span><span>Schema</span><span>Node.js</span><span>CRUD</span></div></div><b>상세 보기 →</b></a>
+      <a class="incident-list-card" href="./kubernetes-ingressclass/"><span class="incident-badge blue">INCIDENT 03 · INFRASTRUCTURE</span><div><h2>Kubernetes 클러스터에 IngressClass가 존재하지 않은 문제</h2><p>Ingress 리소스를 적용하려 했지만 클러스터에서 사용할 수 있는 IngressClass가 확인되지 않았습니다.</p><dl class="incident-facts"><div><dt>영향</dt><dd>Ingress 외부 노출 불가</dd></div><div><dt>확인</dt><dd>No resources found</dd></div><div><dt>원인 범위</dt><dd>Controller 구성</dd></div><div><dt>상태</dt><dd>Investigating</dd></div></dl><div class="meta"><span>Kubernetes</span><span>RKE2</span><span>Ingress</span><span>Networking</span></div></div><b>분석 보기 →</b></a>
     </div>
   </div></section>
 </main>
-
-<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Observe · Hypothesize · Verify · Fix · Prevent</span></div></footer>
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Observe · Analyze · Resolve · Prevent</span></div></footer>
 </body>
 </html>
-

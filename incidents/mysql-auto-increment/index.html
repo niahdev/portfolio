@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MySQL AUTO_INCREMENT 설정 누락으로 발생한 INSERT 실패 해결 기록">
+  <title>MySQL AUTO_INCREMENT 누락 | 문제 해결 기록</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="nav-shell"><div class="wrap nav"><a class="logo" href="../../">PARK<i>.KUNRYUL</i></a><nav class="nav-links" aria-label="주요 탐색"><a href="../../systems/">Systems</a><a href="../">Incidents</a><a href="../../lab/">Lab</a></nav><div class="nav-actions"><a class="btn" href="../">← Incidents</a><a class="btn primary" href="https://github.com/niahdev/kiosk" target="_blank" rel="noreferrer">GitHub ↗</a></div></div></header>
+<main>
+  <section class="article-hero"><div class="wrap"><div class="breadcrumb"><a href="../../">Portfolio</a> / <a href="../">Incidents</a> / MySQL AUTO_INCREMENT</div><div class="incident-kicker"><span class="incident-badge amber">INCIDENT 02</span><span>2026.07</span><span>Student Progress Kiosk</span><span>Database · Data Integrity</span></div><h1>MySQL 기본키 설정 누락으로 인한<br><span class="gradient">INSERT 실패</span></h1><p>코드가 전제한 ID 자동 생성 방식과 실제 데이터베이스 스키마의 차이를 확인하고 함께 수정한 사례입니다.</p><div class="detail-meta"><span class="status-resolved">Resolved</span><span>MySQL</span><span>Schema</span><span>Node.js</span><span>CRUD</span></div></div></section>
+
+  <div class="wrap article-layout incident-article-layout">
+    <aside class="article-nav incident-info"><b>Incident Summary</b><dl><div><dt>Project</dt><dd>Student Progress Kiosk</dd></div><div><dt>Category</dt><dd>Database</dd></div><div><dt>Environment</dt><dd>Node.js · MySQL · Docker</dd></div><div><dt>Status</dt><dd class="status-text resolved">Resolved</dd></div><div><dt>Impact</dt><dd>Data registration failure</dd></div><div><dt>Resolution</dt><dd>Schema alignment</dd></div></dl><nav aria-label="문서 목차"><a href="#overview">개요</a><a href="#situation">문제 상황</a><a href="#observation">관찰한 현상</a><a href="#hypothesis">처음 세운 가설</a><a href="#verification">확인 과정</a><a href="#cause">실제 원인</a><a href="#options">검토한 방법</a><a href="#action">선택한 조치</a><a href="#result">결과</a><a href="#prevention">재발 방지</a><a href="#remaining">남은 개선점</a><a href="#learning">배운 점</a></nav></aside>
+    <article class="article-body">
+      <section class="article-block" id="overview"><span>01 · OVERVIEW</span><h2>개요</h2><p>학생 프로젝트 진행 현황을 관리하는 시스템에서 신규 데이터를 등록할 때 MySQL 오류가 발생했습니다. 애플리케이션 로직에서는 ID가 자동으로 생성될 것으로 예상했지만 실제 스키마는 그 가정과 일치하지 않았습니다.</p></section>
+      <section class="article-block" id="situation"><span>02 · PROBLEM</span><h2>문제 상황</h2><p>학생 데이터를 INSERT하는 과정에서 id 컬럼에 기본값이 없다는 오류가 발생하며 등록이 실패했습니다.</p><pre class="code-block"><code>Field 'id' doesn't have a default value</code></pre></section>
+      <section class="article-block" id="observation"><span>03 · OBSERVATION</span><h2>관찰한 현상</h2><ul class="detail-list"><li>조회 기능은 동작했지만 신규 등록 요청만 실패했습니다.</li><li>요청 데이터에는 학생 정보가 정상적으로 포함됐습니다.</li><li>INSERT 쿼리에서는 id 값을 직접 전달하지 않았습니다.</li><li>MySQL이 id 컬럼의 값을 요구하며 쿼리를 거부했습니다.</li></ul></section>
+      <section class="article-block" id="hypothesis"><span>04 · HYPOTHESIS</span><h2>처음 세운 가설</h2><ul class="plain-list"><li>INSERT 쿼리의 컬럼 수와 값의 수가 다른지</li><li>필수 컬럼을 누락했는지</li><li>Node.js에서 undefined 값이 전달됐는지</li><li>테이블의 기본키 설정이 올바른지</li></ul></section>
+      <section class="article-block" id="verification"><span>05 · VERIFICATION</span><h2>확인 과정</h2><ol class="number-list"><li>애플리케이션에서 실행되는 INSERT 쿼리를 확인했습니다.</li><li>전달되는 요청 데이터가 정상인지 확인했습니다.</li><li>DESCRIBE 명령으로 실제 테이블 구조를 조회했습니다.</li><li>id 컬럼의 Extra 값에 auto_increment가 없는 것을 확인했습니다.</li></ol><pre class="code-block"><code>DESCRIBE students;</code></pre></section>
+      <section class="article-block" id="cause"><span>06 · ROOT CAUSE</span><h2>실제 원인</h2><p>애플리케이션은 id가 자동으로 생성된다고 가정했지만 실제 테이블의 id 컬럼에는 AUTO_INCREMENT가 설정되어 있지 않았습니다. 코드의 가정과 데이터베이스 스키마가 일치하지 않은 것이 원인이었습니다.</p></section>
+      <section class="article-block" id="options"><span>07 · OPTIONS</span><h2>검토한 해결 방법</h2><ol class="number-list"><li>애플리케이션에서 id 값을 직접 계산해 전달</li><li>INSERT 쿼리마다 임시 기본값을 지정</li><li>현재 테이블의 기본키 구조를 수정</li><li>초기화 SQL과 INSERT 로직을 함께 정렬</li></ol><p>애플리케이션에서 ID를 관리하면 동시 등록과 데이터 무결성 문제가 생길 수 있어 데이터베이스가 기본키를 생성하도록 정리했습니다.</p></section>
+      <section class="article-block" id="action"><span>08 · ACTION</span><h2>선택한 조치</h2><p>id 컬럼에 PRIMARY KEY와 AUTO_INCREMENT를 설정하고 INSERT 쿼리에서는 id 값을 직접 전달하지 않도록 정리했습니다.</p><div class="code-comparison"><div><small>수정 전</small><pre class="code-block"><code>id INT NOT NULL</code></pre></div><div><small>수정 후</small><pre class="code-block"><code>id INT NOT NULL
+  AUTO_INCREMENT
+  PRIMARY KEY</code></pre></div></div><p>현재 데이터베이스만 수정하는 데 그치지 않고 새 환경에서도 같은 문제가 발생하지 않도록 테이블 생성 SQL에도 변경 내용을 반영했습니다.</p></section>
+      <section class="article-block" id="result"><span>09 · RESULT</span><h2>결과</h2><ul class="detail-list"><li>신규 데이터가 정상적으로 등록됐습니다.</li><li>ID가 데이터베이스에서 자동으로 생성됐습니다.</li><li>실행 환경마다 테이블 구조가 달라질 가능성을 줄였습니다.</li></ul><div class="result-box">검증 결과: INSERT 요청이 정상 완료되고 생성된 ID를 이후 조회 흐름에서 사용할 수 있었습니다.</div></section>
+      <section class="article-block" id="prevention"><span>10 · PREVENTION</span><h2>재발 방지</h2><ul class="detail-list"><li>데이터베이스 초기화 SQL을 저장소에서 관리합니다.</li><li>애플리케이션 코드와 실제 스키마를 함께 확인합니다.</li><li>배포 시 사용하는 테이블 생성 스크립트를 동일하게 유지합니다.</li></ul></section>
+      <section class="article-block" id="remaining"><span>11 · NEXT</span><h2>남은 개선점</h2><p>스키마 변경 이력이 늘어나면 초기화 SQL만으로는 변경 과정을 추적하기 어렵습니다. 이후에는 마이그레이션 파일과 적용 순서를 명시해 기존 환경과 신규 환경을 같은 구조로 유지할 수 있습니다.</p></section>
+      <section class="article-block" id="learning"><span>12 · LEARNING</span><h2>배운 점</h2><p>데이터베이스 오류를 애플리케이션 코드만 보고 판단해서는 안 됐습니다. 코드가 전제하는 데이터 구조와 실제 데이터베이스에 적용된 구조가 일치하는지 함께 검증해야 했습니다.</p></section>
+    </article>
+  </div>
+</main>
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Incident 02 · Resolved</span></div></footer>
+</body>
+</html>
