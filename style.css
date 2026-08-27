@@ -490,6 +490,17 @@ footer { padding: 18px 0 52px; color: var(--faint); font-size: 13px; }
 .incident-deck-active .article-block.is-active { animation: deck-in 0.28s ease both; }
 .incident-deck-active .article-block h2 { max-width: 720px; margin-top: 13px; font-size: 38px; }
 .incident-deck-active .article-block p, .incident-deck-active .detail-list, .incident-deck-active .plain-list, .incident-deck-active .number-list { font-size: 17px; line-height: 1.85; }
+.decision-grid, .signal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.decision-grid > div, .signal-grid > div { display: grid; gap: 8px; padding: 18px; border: 1px solid var(--line); border-radius: 13px; background: rgba(255, 255, 255, 0.025); }
+.decision-grid b, .signal-grid b { color: #edf3ff; font-size: 15px; }
+.decision-grid span, .signal-grid span { color: var(--muted); font-size: 13px; line-height: 1.65; }
+.decision-grid .selected { border-color: rgba(101, 232, 223, 0.3); background: rgba(101, 232, 223, 0.055); }
+.decision-grid .selected b { color: var(--cyan); }
+.command-record { margin-top: 20px; padding: 17px; border: 1px solid rgba(124, 233, 170, 0.2); border-radius: 13px; background: rgba(124, 233, 170, 0.035); }
+.command-record.pending { border-color: rgba(255, 190, 92, 0.2); background: rgba(255, 190, 92, 0.035); }
+.command-record > b { display: block; margin-bottom: 11px; color: var(--green); font-size: 13px; }
+.command-record.pending > b { color: var(--amber); }
+.command-record .code-block { margin: 0; }
 .article-nav a.is-active { color: var(--cyan); }
 @keyframes deck-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
 
@@ -620,6 +631,7 @@ footer { padding: 18px 0 52px; color: var(--faint); font-size: 13px; }
   .incident-deck-active .article-body { min-height: 440px; padding: 25px; }
   .incident-deck-active .article-block h2 { font-size: 30px; }
   .incident-deck-active .article-block p, .incident-deck-active .detail-list, .incident-deck-active .plain-list, .incident-deck-active .number-list { font-size: 15px; }
+  .decision-grid, .signal-grid { grid-template-columns: 1fr; }
   .troubleshooting-card { padding: 23px; }
   .troubleshooting-grid { grid-auto-columns: minmax(82vw, 1fr); }
 }

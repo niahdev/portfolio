@@ -13,41 +13,33 @@
   <section class="article-hero"><div class="wrap"><div class="breadcrumb"><a href="../../">Portfolio</a> / <a href="../">Incidents</a> / FFmpeg Concurrency</div><div class="incident-kicker"><span class="incident-badge">INCIDENT 01</span><span>2026.07</span><span>gif lower</span><span>Backend · Server Resource</span></div><h1>FFmpeg 동시 실행으로 인한<br><span class="gradient">서버 응답 지연</span></h1><p>CPU 사용량이 큰 변환 작업을 HTTP 요청과 분리하고, 동시 실행 수를 제한하도록 작업 구조를 변경한 사례입니다.</p><div class="detail-meta"><span class="status-resolved">Resolved</span><span>Node.js</span><span>FFmpeg</span><span>Job Queue</span><span>Docker</span></div></div></section>
 
   <div class="wrap article-layout incident-article-layout">
-    <aside class="article-nav incident-info"><b>Incident Summary</b><dl><div><dt>Project</dt><dd>gif lower</dd></div><div><dt>Category</dt><dd>Server Resource</dd></div><div><dt>Environment</dt><dd>Node.js · Docker · Linux</dd></div><div><dt>Status</dt><dd class="status-text resolved">Resolved</dd></div><div><dt>Impact</dt><dd>API response delay risk</dd></div><div><dt>Resolution</dt><dd>Concurrency control</dd></div></dl><nav aria-label="문서 목차"><a href="#overview">개요</a><a href="#situation">문제 상황</a><a href="#observation">관찰한 현상</a><a href="#hypothesis">처음 세운 가설</a><a href="#verification">확인 과정</a><a href="#cause">실제 원인</a><a href="#options">검토한 방법</a><a href="#action">선택한 조치</a><a href="#result">결과</a><a href="#prevention">재발 방지</a><a href="#remaining">남은 개선점</a><a href="#learning">배운 점</a></nav></aside>
+    <aside class="article-nav incident-info"><b>Incident Summary</b><dl><div><dt>Project</dt><dd>gif lower</dd></div><div><dt>Category</dt><dd>Server Resource</dd></div><div><dt>Environment</dt><dd>Node.js · Docker · Linux</dd></div><div><dt>Status</dt><dd class="status-text resolved">Resolved</dd></div><div><dt>Impact</dt><dd>API response delay risk</dd></div><div><dt>Resolution</dt><dd>Concurrency control</dd></div><div><dt>Record basis</dt><dd>Source · Tests · Git history</dd></div></dl><nav aria-label="문서 목차"><a href="#overview">개요</a><a href="#situation">문제 상황</a><a href="#impact">영향 범위</a><a href="#observation">확인된 증거</a><a href="#hypothesis">가설</a><a href="#verification">진단 과정</a><a href="#cause">실제 원인</a><a href="#options">대안 비교</a><a href="#action">선택한 조치</a><a href="#implementation">구현 상세</a><a href="#result">검증과 결과</a><a href="#prevention">운영 안전장치</a><a href="#remaining">기록 한계·다음 단계</a><a href="#learning">배운 점</a></nav></aside>
     <article class="article-body">
       <section class="article-block" id="overview"><span>01 · OVERVIEW</span><h2>개요</h2><p>gif lower는 사용자가 업로드한 GIF 파일을 FFmpeg로 변환해 용량을 줄인 결과물을 제공하는 서비스입니다. 변환 기능 자체는 정상적으로 동작했지만, 여러 요청이 동시에 들어오는 상황에서는 FFmpeg 프로세스가 한꺼번에 실행될 수 있는 구조였습니다.</p></section>
       <section class="article-block" id="situation"><span>02 · PROBLEM</span><h2>문제 상황</h2><p>각 변환 요청은 CPU를 많이 사용하는 FFmpeg 작업을 생성합니다. 요청 하나만 처리할 때는 문제가 없었지만, 여러 사용자의 요청이 겹치면 실행 중인 프로세스가 증가하고 API 서버까지 영향을 받을 가능성이 있었습니다.</p></section>
-      <section class="article-block" id="observation"><span>03 · OBSERVATION</span><h2>관찰한 현상</h2><ul class="detail-list"><li>요청마다 별도의 FFmpeg 프로세스가 생성됐습니다.</li><li>변환 작업의 실행 시간 동안 CPU 사용량이 증가했습니다.</li><li>실행 중인 작업 수를 제한하는 장치가 없었습니다.</li><li>API 요청 처리와 파일 변환 작업이 같은 흐름 안에서 실행됐습니다.</li></ul><div class="evidence-box">수치가 남아 있지 않은 부분은 임의로 만들지 않았습니다. 확인 기준은 요청 수, FFmpeg 프로세스 수, 작업 완료 여부와 일반 API 응답 가능 여부였습니다.</div></section>
-      <section class="article-block" id="hypothesis"><span>04 · HYPOTHESIS</span><h2>처음 세운 가설</h2><ul class="plain-list"><li>파일 업로드 크기가 지나치게 큰지</li><li>네트워크 전송 시간이 병목인지</li><li>FFmpeg 프로세스 우선순위가 높은지</li><li>동시 실행되는 프로세스 수가 자원을 경합하는지</li></ul></section>
-      <section class="article-block" id="verification"><span>05 · VERIFICATION</span><h2>확인 과정</h2><p>단일 요청과 동시 요청을 나눠 실행 중인 FFmpeg 프로세스 수와 작업 완료 흐름을 비교했습니다. 파일 하나의 처리보다 요청이 겹칠 때 실행 프로세스가 함께 증가하는 구조를 우선 확인했습니다.</p><div class="evidence-box">확인 흐름: 단일 요청 → 동시 요청 → 프로세스 수 비교 → 일반 API 응답 여부 확인</div></section>
-      <section class="article-block" id="cause"><span>06 · ROOT CAUSE</span><h2>실제 원인</h2><p>문제의 원인은 FFmpeg 자체가 아니라 CPU 집약적인 작업을 제한 없이 동시에 실행할 수 있는 구조였습니다. HTTP 요청이 들어올 때마다 변환 작업을 바로 시작했기 때문에 요청 수가 실행 중인 프로세스 수로 이어질 수 있었습니다.</p></section>
-      <section class="article-block" id="options"><span>07 · OPTIONS</span><h2>검토한 해결 방법</h2><ol class="number-list"><li>파일 업로드 크기만 제한하는 방법</li><li>일정 수 이상의 요청을 바로 거부하는 방법</li><li>FFmpeg 프로세스의 우선순위를 낮추는 방법</li><li>작업 큐를 두고 동시 실행 수를 제한하는 방법</li></ol></section>
-      <section class="article-block" id="action"><span>08 · ACTION</span><h2>선택한 조치</h2><p>변환 요청을 바로 실행하지 않고 작업 큐에 등록하도록 변경했습니다. 실행 중인 변환 작업 수를 제한하고 작업이 끝난 뒤 다음 작업을 처리하도록 구성했습니다.</p><pre class="code-block"><code>const queue = [];
-let activeJobs = 0;
-const maxConcurrentJobs = 2;
+      <section class="article-block" id="impact"><span>03 · IMPACT</span><h2>영향 범위</h2><p>변환 자체의 실패보다 더 큰 위험은 같은 Node.js 서비스가 제공하는 작업 생성·상태 조회·다운로드·헬스체크 응답까지 느려지는 것이었습니다. 따라서 목표를 “FFmpeg 성공”이 아니라 “변환 요청이 겹쳐도 API 제어 흐름을 유지”하는 것으로 잡았습니다.</p><div class="evidence-box">영향 범위: 단일 Linux 서버의 CPU와 메모리, 같은 프로세스가 제공하는 HTTP API. 데이터 손상이나 외부 장애는 확인되지 않았습니다.</div></section>
+      <section class="article-block" id="observation"><span>04 · EVIDENCE</span><h2>확인된 증거</h2><ul class="detail-list"><li>GIF 후보를 만들 때마다 별도 <code>ffmpeg</code> 자식 프로세스를 실행합니다.</li><li>한 작업도 여러 품질 프리셋을 순서대로 시험할 수 있습니다.</li><li>작업 생성 API는 완료를 기다리지 않고 <code>202 Accepted</code>와 작업 ID를 반환합니다.</li><li>현재 소스는 <code>pendingJobs</code>, <code>activeJobs</code>, <code>MAX_CONCURRENT_JOBS</code>로 실행 수를 통제합니다.</li></ul><div class="evidence-box">근거: 공개 저장소의 <code>src/server.js</code>, <code>src/compressor.js</code>, 커밋 <code>0eddbc9</code>·<code>2fd5bdf</code>. 과거 CPU 퍼센트와 응답시간 원본은 남아 있지 않습니다.</div></section>
+      <section class="article-block" id="hypothesis"><span>05 · HYPOTHESIS</span><h2>가설을 나눴습니다</h2><ul class="plain-list"><li>업로드 파일 크기 때문에 전송 구간이 느린가</li><li>FFmpeg 한 작업 자체의 프리셋 탐색이 오래 걸리는가</li><li>여러 작업이 동시에 자원을 경합하는가</li><li>완료 파일과 임시 파일이 누적돼 디스크까지 압박하는가</li></ul><p>단일 작업 최적화와 동시 요청 제어는 별개 문제로 보고, 먼저 서버 전체에 영향을 주는 동시성 경계를 해결했습니다.</p></section>
+      <section class="article-block" id="verification"><span>06 · DIAGNOSIS</span><h2>진단 순서</h2><ol class="number-list"><li>요청 한 건이 생성하는 자식 프로세스 흐름을 확인했습니다.</li><li>후보 프리셋 반복이 한 작업의 실행 시간을 늘릴 수 있음을 확인했습니다.</li><li>요청 수가 그대로 동시 실행 수가 되는 구조인지 점검했습니다.</li><li>HTTP 응답과 실제 변환 실행을 분리할 수 있는지 검토했습니다.</li></ol><div class="evidence-box">판단 기준: “요청 접수 수”와 “현재 실행 수”가 분리되어야 하며, 실행 수는 환경변수의 상한을 넘지 않아야 합니다.</div></section>
+      <section class="article-block" id="cause"><span>07 · ROOT CAUSE</span><h2>실제 원인</h2><p>FFmpeg 자체의 오류가 아니라 CPU 집약적인 작업에 동시성 경계가 없던 실행 구조가 원인이었습니다. HTTP 요청이 들어오는 속도와 서버가 변환을 처리할 수 있는 속도가 다르므로, 둘 사이에 대기열과 실행 상한이 필요했습니다.</p></section>
+      <section class="article-block" id="options"><span>08 · DECISION</span><h2>대안을 비교했습니다</h2><div class="decision-grid"><div><b>업로드 크기 제한</b><span>한 작업의 상한은 만들지만 동시 실행 수는 제어하지 못함</span></div><div><b>초과 요청 거부</b><span>서버는 보호하지만 사용자가 작업을 잃음</span></div><div><b>프로세스 우선순위 조정</b><span>경합의 강도만 낮추고 개수는 그대로임</span></div><div class="selected"><b>메모리 큐 + 동시성 제한</b><span>현재 단일 서버 규모에서 가장 단순하게 실행 상한을 보장</span></div></div></section>
+      <section class="article-block" id="action"><span>09 · ACTION</span><h2>선택한 조치</h2><p>작업 생성 요청에는 즉시 작업 ID를 반환하고, 실제 변환은 <code>pendingJobs</code>에 넣었습니다. <code>runNextJob()</code>은 실행 중 작업이 설정값보다 적을 때만 다음 작업을 시작합니다.</p><pre class="code-block"><code>const maxConcurrentJobs = Math.max(
+  1,
+  Number(process.env.MAX_CONCURRENT_JOBS) || 2
+);
 
-function enqueue(job) {
-  queue.push(job);
-  processNext();
-}
-
-async function processNext() {
-  if (activeJobs >= maxConcurrentJobs || queue.length === 0) return;
-
-  const job = queue.shift();
-  activeJobs += 1;
-
-  try {
-    await runFfmpeg(job);
-  } finally {
-    activeJobs -= 1;
-    processNext();
+function runNextJob() {
+  while (activeJobs &lt; maxConcurrentJobs &amp;&amp; pendingJobs.length &gt; 0) {
+    const next = pendingJobs.shift();
+    activeJobs += 1;
+    void processJob(next.job, next.targetBytes);
   }
 }</code></pre></section>
-      <section class="article-block" id="result"><span>09 · RESULT</span><h2>결과</h2><ul class="detail-list"><li>동시에 실행되는 FFmpeg 작업 수를 제한했습니다.</li><li>API 요청 처리와 CPU 집약적 변환 작업의 실행 흐름을 분리했습니다.</li><li>서버 자원이 특정 시점에 집중되는 위험을 줄였습니다.</li><li>재시도, 대기 상태, 작업 만료 기능을 추가하기 쉬운 구조가 됐습니다.</li></ul><div class="result-box">검증 결과: 대기 작업과 실행 작업이 분리되고, 실행 중인 FFmpeg 프로세스 수가 설정값 안에서 유지됩니다.</div></section>
-      <section class="article-block" id="prevention"><span>10 · PREVENTION</span><h2>재발 방지</h2><p>CPU 집약 작업을 추가할 때 동시성, 대기열, 실패 처리, 임시 파일 정리 시점을 기능 구현과 함께 검토하도록 기준을 남겼습니다.</p></section>
-      <section class="article-block" id="remaining"><span>11 · NEXT</span><h2>남은 개선점</h2><p>현재 구조는 단일 서버의 메모리 내 작업 큐를 기준으로 합니다. 서버가 재시작되면 대기 중인 작업 정보가 사라질 수 있으므로 향후 Redis 기반 큐나 별도 Worker 구조로 분리할 수 있습니다.</p></section>
-      <section class="article-block" id="learning"><span>12 · LEARNING</span><h2>배운 점</h2><p>기능이 정상적으로 실행되는 것과 운영 환경에서 안전하게 실행되는 것은 다른 문제였습니다. CPU 사용량이 큰 작업은 요청 처리와 분리하고 서버가 감당할 수 있는 범위 안에서 실행되도록 제어해야 한다는 점을 확인했습니다.</p></section>
+      <section class="article-block" id="implementation"><span>10 · IMPLEMENTATION</span><h2>큐만 넣고 끝내지 않았습니다</h2><ul class="detail-list"><li><code>/health</code>에서 실행·대기 작업 수를 확인할 수 있습니다.</li><li>IP별 작업 생성은 한 시간에 12개로 제한했습니다.</li><li>업로드는 GIF 한 개, 최대 100MB로 제한했습니다.</li><li>완료·실패 작업과 임시 파일은 15분 뒤 정리합니다.</li><li><code>finally</code>에서 실행 수를 감소시켜 실패해도 큐가 계속 진행됩니다.</li></ul></section>
+      <section class="article-block" id="result"><span>11 · VERIFICATION</span><h2>검증과 결과</h2><ul class="detail-list"><li><code>node --test</code> 실행 결과 4개 테스트가 모두 통과했습니다.</li><li>FPS 파싱, 품질 프리셋 순서, 크기 표시, 해상도 프리셋을 검증했습니다.</li><li>대기 작업과 실행 작업이 별도 상태로 관리됩니다.</li><li>실행 중 작업 수는 <code>MAX_CONCURRENT_JOBS</code>의 상한 안에서만 증가합니다.</li></ul><div class="result-box">2026-08-28 재검증: tests 4 · pass 4 · fail 0. 공개 소스와 현재 포트폴리오의 설명도 대조했습니다.</div></section>
+      <section class="article-block" id="prevention"><span>12 · OPERATIONS</span><h2>운영 안전장치</h2><p>동시성 상한, 요청 제한, 업로드 제한, 실패 처리, 파일 보존 시간을 함께 두었습니다. CPU 집약 작업을 추가할 때도 “접수 → 대기 → 실행 → 완료/실패 → 정리”의 수명주기를 먼저 설계하도록 기준을 남겼습니다.</p></section>
+      <section class="article-block" id="remaining"><span>13 · LIMITS &amp; NEXT</span><h2>기록 한계와 다음 단계</h2><ul class="detail-list"><li>장애 당시 CPU·메모리·응답시간 시계열은 남아 있지 않아 수치를 만들지 않았습니다.</li><li>현재 큐는 단일 서버 메모리에 있어 재시작하면 대기 작업을 잃을 수 있습니다.</li><li>다중 인스턴스로 확장할 때는 Redis 기반 큐와 별도 Worker가 필요합니다.</li><li>다음 증거는 동시 요청 부하 테스트와 p95 응답시간 비교입니다.</li></ul></section>
+      <section class="article-block" id="learning"><span>14 · LEARNING</span><h2>배운 점</h2><p>기능이 정상적으로 실행되는 것과 운영 환경에서 안전하게 실행되는 것은 다른 문제였습니다. CPU 집약 작업은 요청 수를 그대로 프로세스 수로 바꾸지 말고, 서버 용량에 맞는 명시적인 실행 경계를 가져야 합니다.</p></section>
     </article>
   </div>
 </main>
