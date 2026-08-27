@@ -107,13 +107,24 @@ function setupIncidentDeck() {
     if (updateHash) history.replaceState(null, "", `#${slides[current].id}`);
   }
 
-  prev.addEventListener("click", () => showSlide(current - 1));
-  next.addEventListener("click", () => showSlide(current + 1));
+  function revealArticle(behavior = "smooth") {
+    controls.scrollIntoView({ behavior, block: "start" });
+  }
+
+  prev.addEventListener("click", () => {
+    showSlide(current - 1);
+    revealArticle();
+  });
+  next.addEventListener("click", () => {
+    showSlide(current + 1);
+    revealArticle();
+  });
   navLinks.forEach((link) => link.addEventListener("click", (event) => {
     const index = slides.findIndex((slide) => `#${slide.id}` === link.hash);
     if (index < 0) return;
     event.preventDefault();
     showSlide(index);
+    revealArticle();
   }));
   window.addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft") showSlide(current - 1);
