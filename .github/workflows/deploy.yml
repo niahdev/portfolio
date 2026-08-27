@@ -52,6 +52,6 @@ jobs:
 
       - name: Verify deployment
         run: |
-          for path in / /systems/ /incidents/ /incidents/ffmpeg-concurrency/ /incidents/mysql-auto-increment/ /incidents/kubernetes-ingressclass/ /lab/; do
+          for path in / /systems/ /troubleshooting/ /incidents/ /incidents/ffmpeg-concurrency/ /incidents/mysql-auto-increment/ /incidents/ovh-ssh-key-recovery/ /incidents/kubernetes-ingressclass/ /lab/; do
             curl --fail --silent --show-error "https://pt.niah.site$path" > /dev/null
           done

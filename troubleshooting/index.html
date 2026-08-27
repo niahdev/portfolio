@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="서버와 서비스 운영 중 발생한 문제의 원인 분석과 해결 기록">
+  <title>트러블슈팅 | 박건률</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="troubleshooting-page">
+<header class="nav-shell">
+  <div class="wrap nav">
+    <a class="logo" href="../">PARK<i>.KUNRYUL</i></a>
+    <nav class="nav-links" aria-label="주요 메뉴"><a href="../#operations">Operations</a><a href="./">Troubleshooting</a><a href="../#architecture">Infrastructure</a><a href="../#systems">Projects</a></nav>
+    <div class="nav-actions"><a class="btn" href="../">← Portfolio</a><a class="btn primary" href="../incidents/">All Incidents</a></div>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero troubleshooting-hero">
+    <div class="wrap">
+      <div class="breadcrumb"><a href="../">Portfolio</a> / Troubleshooting</div>
+      <div class="section-tag">Troubleshooting</div>
+      <h1>문제를 재현하고,<br><span class="gradient">원인을 좁혀 해결합니다.</span></h1>
+      <p>운영 중 마주친 문제를 추측으로 끝내지 않고 확인 가능한 흐름으로 정리했습니다.</p>
+      <div class="troubleshooting-flow" aria-label="트러블슈팅 진행 순서">
+        <div><span>01</span><b>문제</b><small>영향과 증상 확인</small></div><i>→</i>
+        <div><span>02</span><b>원인</b><small>가설과 검증</small></div><i>→</i>
+        <div><span>03</span><b>해결</b><small>구조와 설정 변경</small></div><i>→</i>
+        <div><span>04</span><b>결과</b><small>동작 확인·재발 방지</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="wrap">
+      <div class="subsection-head"><div><div class="section-tag">Case Track</div><h2>트러블슈팅 사례</h2></div><p>사례 영역을 옆으로 끌거나 스와이프해 다음 기록을 확인하세요.</p></div>
+      <div class="drag-hint" aria-hidden="true"><span>←</span> DRAG TO EXPLORE <span>→</span></div>
+      <div class="troubleshooting-grid" aria-label="옆으로 끌어보는 트러블슈팅 사례">
+        <a class="troubleshooting-card" href="../incidents/ffmpeg-concurrency/">
+          <div><span class="incident-badge">RESOLVED · SERVER</span><small>01 / 04</small></div>
+          <h2>FFmpeg 동시 실행으로 인한 서버 응답 지연</h2>
+          <dl><div><dt>원인</dt><dd>무제한 프로세스 실행</dd></div><div><dt>해결</dt><dd>Queue와 동시성 제한</dd></div></dl>
+          <b>상세 기록 보기 →</b>
+        </a>
+        <a class="troubleshooting-card" href="../incidents/mysql-auto-increment/">
+          <div><span class="incident-badge amber">RESOLVED · DATABASE</span><small>02 / 04</small></div>
+          <h2>MySQL 기본키 설정 누락으로 인한 INSERT 실패</h2>
+          <dl><div><dt>원인</dt><dd>코드와 실제 스키마 불일치</dd></div><div><dt>해결</dt><dd>AUTO_INCREMENT 정렬</dd></div></dl>
+          <b>상세 기록 보기 →</b>
+        </a>
+        <a class="troubleshooting-card" href="../incidents/ovh-ssh-key-recovery/">
+          <div><span class="incident-badge blue">RESOLVED · ACCESS</span><small>03 / 04</small></div>
+          <h2>OVH VPS SSH 개인키 인증 복구</h2>
+          <dl><div><dt>문제</dt><dd>로컬 개인키 인증 거부</dd></div><div><dt>복구</dt><dd>OVH 콘솔에서 공개키 재등록</dd></div></dl>
+          <b>상세 기록 보기 →</b>
+        </a>
+        <a class="troubleshooting-card investigating" href="../incidents/kubernetes-ingressclass/">
+          <div><span class="incident-badge blue">INVESTIGATING · INFRA</span><small>04 / 04</small></div>
+          <h2>Kubernetes IngressClass가 존재하지 않은 문제</h2>
+          <dl><div><dt>원인 범위</dt><dd>Controller 설치·등록 상태</dd></div><div><dt>현재</dt><dd>RKE2 구성 검증 중</dd></div></dl>
+          <b>분석 기록 보기 →</b>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Problem → Cause → Resolution → Result</span></div></footer>
+<script src="../site.js" defer></script>
+</body>
+</html>

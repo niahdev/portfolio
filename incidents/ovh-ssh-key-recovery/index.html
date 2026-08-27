@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="OVH VPS에서 로컬 SSH 개인키 인증이 거부된 뒤 웹 콘솔로 접근을 복구한 기록">
+  <title>OVH VPS SSH 키 복구 | 문제 해결 기록</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<header class="nav-shell"><div class="wrap nav"><a class="logo" href="../../">PARK<i>.KUNRYUL</i></a><nav class="nav-links" aria-label="주요 탐색"><a href="../../systems/">Systems</a><a href="../">Incidents</a><a href="../../lab/">Lab</a></nav><div class="nav-actions"><a class="btn" href="../../troubleshooting/">← Troubleshooting</a><a class="btn primary" href="../../systems/">Systems →</a></div></div></header>
+<main>
+  <section class="article-hero"><div class="wrap"><div class="breadcrumb"><a href="../../">Portfolio</a> / <a href="../">Incidents</a> / OVH SSH Recovery</div><div class="incident-kicker"><span class="incident-badge blue">INCIDENT 03</span><span>2026.07</span><span>OVHcloud VPS</span><span>Server Access · Linux</span></div><h1>OVH VPS의<br><span class="gradient">SSH 개인키 인증 복구</span></h1><p>기존 로컬 개인키 인증이 거부돼 배포 서버에 접근할 수 없었던 상황에서, OVH 제공 콘솔을 비상 경로로 사용해 공개키를 다시 등록한 사례입니다.</p><div class="detail-meta"><span class="status-resolved">Resolved</span><span>Linux</span><span>SSH</span><span>OVHcloud</span><span>Access Recovery</span></div></div></section>
+
+  <div class="wrap article-layout incident-article-layout">
+    <aside class="article-nav incident-info"><b>Incident Summary</b><dl><div><dt>Environment</dt><dd>Ubuntu · OVHcloud VPS</dd></div><div><dt>Status</dt><dd class="status-text resolved">Resolved</dd></div><div><dt>Impact</dt><dd>Deployment access blocked</dd></div><div><dt>Recovery</dt><dd>Console · Key re-registration</dd></div></dl><nav aria-label="문서 목차"><a href="#overview">개요</a><a href="#problem">문제</a><a href="#observation">관찰</a><a href="#scope">원인 범위</a><a href="#recovery">복구</a><a href="#verification">검증</a><a href="#result">결과</a><a href="#prevention">재발 대비</a><a href="#learning">배운 점</a></nav></aside>
+    <article class="article-body">
+      <section class="article-block" id="overview"><span>01 · OVERVIEW</span><h2>개요</h2><p>로컬 PC에서 기존에 사용하던 SSH 개인키로 OVH VPS에 접속하려 했지만 공개키 인증이 더 이상 통과하지 않았습니다. 서비스는 동작 중이었지만 운영과 배포를 위한 서버 접근이 중단된 상태였습니다.</p></section>
+      <section class="article-block" id="problem"><span>02 · PROBLEM</span><h2>문제</h2><p>여러 계정과 로컬 키를 명시해 접속을 확인했지만 서버가 공개키 인증을 거부했습니다.</p><pre class="code-block"><code>Permission denied (publickey)</code></pre></section>
+      <section class="article-block" id="observation"><span>03 · OBSERVATION</span><h2>관찰</h2><ul class="detail-list"><li>초기에는 SSH 22번 포트까지 연결됐지만 키 인증이 실패했습니다.</li><li>별도 배포 키도 대상 계정에서 승인되지 않았습니다.</li><li>확인 과정 중에는 22번 포트 연결 타임아웃도 발생했습니다.</li><li>일반 SSH 경로만으로는 서버 안의 키 등록 상태를 수정할 수 없었습니다.</li></ul></section>
+      <section class="article-block" id="scope"><span>04 · CAUSE RANGE</span><h2>원인 범위</h2><p>서버에 등록된 공개키와 로컬 개인키의 대응 상태, 대상 계정의 <code>authorized_keys</code>, SSH 접근 제어 상태로 범위를 좁혔습니다. 당시 기록만으로 단일 원인을 확정하지는 않았습니다.</p><div class="evidence-box">확정된 사실: 기존 로컬 키 인증이 거부됐고, 서버 측 공개키를 재등록한 뒤 동일 계정의 접속이 복구됐습니다.</div></section>
+      <section class="article-block" id="recovery"><span>05 · RECOVERY</span><h2>복구</h2><ol class="number-list"><li>OVH에서 제공하는 웹 콘솔/CMD 환경으로 서버에 접속했습니다.</li><li>기존 SSH 키 인증 상태를 초기화했습니다.</li><li>로컬 개인키에 대응하는 공개키를 서버 계정에 다시 등록했습니다.</li><li>일반 SSH 접속 경로로 돌아와 인증을 재확인했습니다.</li></ol><div class="evidence-box">콘솔에서 사용자가 직접 실행한 세부 명령은 세션에 남아 있지 않아 임의로 재구성하지 않았습니다.</div></section>
+      <section class="article-block" id="verification"><span>06 · VERIFICATION</span><h2>검증</h2><ul class="detail-list"><li><code>ubuntu</code> 계정으로 SSH 접속 성공</li><li>서버 호스트명과 Linux 운영체제 확인</li><li><code>/home/ubuntu</code> 쓰기 가능 확인</li><li>이후 파일 업로드와 Nginx·서비스 배포 진행</li></ul></section>
+      <section class="article-block" id="result"><span>07 · RESULT</span><h2>결과</h2><p>운영 서버의 관리 접근을 복구했고, 중단됐던 배포 작업을 이어갈 수 있었습니다.</p><div class="result-box">검증 결과: SSH 로그인과 홈 디렉터리 쓰기가 정상 동작하고 이후 실제 서비스 배포까지 완료했습니다.</div></section>
+      <section class="article-block" id="prevention"><span>08 · PREVENTION</span><h2>재발 대비</h2><ul class="detail-list"><li>OVH 웹 콘솔 같은 별도 관리 경로를 비상 접근 수단으로 유지합니다.</li><li>서버 계정과 공개키·로컬 키 파일의 대응 관계를 기록합니다.</li><li>키 지문을 비교해 잘못된 키 사용 여부를 빠르게 확인합니다.</li><li>키 인증 실패와 네트워크·방화벽 차단을 분리해 진단합니다.</li></ul></section>
+      <section class="article-block" id="learning"><span>09 · LEARNING</span><h2>배운 점</h2><p>SSH는 서버 운영의 단일 진입점이 될 수 있으므로, 키 인증이 끊겼을 때 사용할 공급자 콘솔과 복구 절차를 미리 확보해야 합니다. 접속 실패도 인증 문제와 네트워크 문제를 구분해야 원인을 빠르게 좁힐 수 있습니다.</p></section>
+    </article>
+  </div>
+</main>
+<footer><div class="wrap footer-row"><span>© 2026 Park Kunryul.</span><span>Incident 03 · Resolved</span></div></footer>
+<script src="../../site.js" defer></script>
+</body>
+</html>
