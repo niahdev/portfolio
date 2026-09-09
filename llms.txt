@@ -1,0 +1,25 @@
+# Park Kunryul — Backend / DevOps / Server Engineer
+
+This is the public engineering portfolio of Park Kunryul (박건률).
+The site documents deployed services, Linux server operations, CI/CD, infrastructure design, and incident troubleshooting.
+
+Primary language: Korean
+Canonical site: https://pt.niah.site/
+GitHub: https://github.com/niahdev
+
+## Main sections
+
+- Portfolio overview: https://pt.niah.site/
+- Systems and public service status: https://pt.niah.site/systems/
+- Troubleshooting case browser: https://pt.niah.site/troubleshooting/
+- Incident archive: https://pt.niah.site/incidents/
+- Infrastructure lab: https://pt.niah.site/lab/
+
+## Incident records
+
+- FFmpeg concurrency and server resource control: https://pt.niah.site/incidents/ffmpeg-concurrency/
+- MySQL AUTO_INCREMENT schema mismatch: https://pt.niah.site/incidents/mysql-auto-increment/
+- OVHcloud VPS SSH key recovery: https://pt.niah.site/incidents/ovh-ssh-key-recovery/
+- RKE2 Kubernetes IngressClass investigation: https://pt.niah.site/incidents/kubernetes-ingressclass/
+
+The Kubernetes record is explicitly marked Investigating. Other incident pages distinguish verified evidence from missing historical data and do not invent operational metrics.
