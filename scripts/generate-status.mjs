@@ -1,9 +1,9 @@
 import { writeFile } from "node:fs/promises";
 
 const targets = [
-  { name: "ER-Dodge", url: "https://niah.site/", environment: "OVHcloud · Docker" },
-  { name: "gif_lower", url: "https://gif.niah.site/", environment: "OVHcloud · Docker" },
-  { name: "Portfolio", url: "https://pt.niah.site/", environment: "Nginx · GitHub Actions" }
+  { name: "ER-Dodge", url: "https://niah.site/", environment: "OVHcloud · K3s" },
+  { name: "gif_lower", url: "https://gif.niah.site/", environment: "OVHcloud · K3s" },
+  { name: "Portfolio", url: "https://pt.niah.site/", environment: "K3s · GitHub Actions" }
 ];
 
 async function checkService(target) {

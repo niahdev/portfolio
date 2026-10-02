@@ -39,7 +39,7 @@
     <div class="bench-wrap fact-strip" aria-label="현재 운영 환경">
       <div><b>02</b><span>PUBLIC SERVICES</span></div>
       <div><b>01</b><span>OVHCLOUD VPS</span></div>
-      <div><b>Docker</b><span>APPLICATION RUNTIME</span></div>
+      <div><b>K3s</b><span>CLUSTER RUNTIME</span></div>
       <div><b>GitHub Actions</b><span>DEPLOYMENT</span></div>
     </div>
   </section>
@@ -60,16 +60,16 @@
           <dl class="case-list">
             <div><dt>만든 것</dt><dd>외부 데이터 수집·정규화, 전적 비교 로직, 결과 API와 화면</dd></div>
             <div><dt>장애 대응</dt><dd>외부 API 실패 시 마지막 정상 캐시와 번들 데이터 사용</dd></div>
-            <div><dt>운영</dt><dd>Docker 실행 환경, Nginx HTTPS 프록시, OVHcloud 배포</dd></div>
+            <div><dt>운영</dt><dd>컨테이너 이미지, K3s Deployment, Traefik HTTPS Ingress</dd></div>
           </dl>
-          <div class="tech-line">Node.js / External API / Docker / Nginx</div>
+          <div class="tech-line">Node.js / External API / K3s / Traefik</div>
           <div class="case-links"><a href="./project-er-dodge.html">자세히 보기 →</a><a href="https://niah.site/" target="_blank" rel="noreferrer">서비스 ↗</a><a href="https://github.com/niahdev/er-dodge" target="_blank" rel="noreferrer">코드 ↗</a></div>
         </div>
         <div class="case-diagram" aria-label="ER-Dodge 처리 구조">
           <p>REQUEST / DATA FLOW</p>
           <div class="diagram-row"><span>01</span><b>Client</b><small>분석 요청</small></div>
           <i>↓</i>
-          <div class="diagram-row"><span>02</span><b>Nginx</b><small>HTTPS · Proxy</small></div>
+          <div class="diagram-row"><span>02</span><b>Traefik</b><small>HTTPS · Ingress</small></div>
           <i>↓</i>
           <div class="diagram-row"><span>03</span><b>Node.js</b><small>수집 · 정규화 · 비교</small></div>
           <i>↓</i>
@@ -85,9 +85,9 @@
           <dl class="case-list">
             <div><dt>만든 것</dt><dd>파일 업로드, 압축 후보 탐색, 작업 상태 확인, 결과 다운로드</dd></div>
             <div><dt>고친 문제</dt><dd>FFmpeg 동시 실행으로 서버가 느려져 작업 큐와 실행 수 제한 추가</dd></div>
-            <div><dt>운영</dt><dd>임시 파일 자동 정리, IP별 작업 제한, Docker·Nginx 배포</dd></div>
+            <div><dt>운영</dt><dd>임시 파일 자동 정리, IP별 작업 제한, K3s·Traefik 배포</dd></div>
           </dl>
-          <div class="tech-line">Node.js / FFmpeg / Job queue / Docker</div>
+          <div class="tech-line">Node.js / FFmpeg / Job queue / K3s</div>
           <div class="case-links"><a href="./project-gif-lower.html">자세히 보기 →</a><a href="https://gif.niah.site/" target="_blank" rel="noreferrer">서비스 ↗</a><a href="https://github.com/niahdev/gif_lower" target="_blank" rel="noreferrer">코드 ↗</a></div>
         </div>
         <div class="case-diagram" aria-label="gif_lower 작업 구조">
@@ -128,8 +128,8 @@
       </div>
       <div class="stack-groups">
         <div><b>애플리케이션</b><p>JavaScript · Node.js · MySQL · SQLite · REST API · FFmpeg</p></div>
-        <div><b>서버와 배포</b><p>Ubuntu · Docker · Docker Compose · Nginx · GitHub Actions · SSH</p></div>
-        <div><b>현재 확인 중</b><p>RKE2 · Kubernetes · Ingress · Argo CD</p></div>
+        <div><b>서버와 배포</b><p>Ubuntu · Docker · K3s · Kubernetes · Traefik · GitHub Actions · SSH</p></div>
+        <div><b>현재 확인 중</b><p>RKE2 · Argo CD</p></div>
         <div><b>아직 사용하지 않음</b><p>Prometheus · Grafana</p></div>
       </div>
     </div>
